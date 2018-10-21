@@ -1,3 +1,4 @@
+const _ = require('lodash');
 var express = require('express');
 var bodyParser = require('body-parser');
 const {ObjectId} = require('mongodb');
@@ -68,4 +69,28 @@ app.delete('/todos/:id',(req, res) => {
 });
 app.listen(port, () => {
   console.log(`App started up at port : ${port}`);
+});
+
+app.patch('/todos/:id',(req, res)=>{
+  var id = req.params.id;
+  var body = _.pick(req.body,['text','completed']);//this checks if any of these two values are present in req body, as we don't update anything else
+  if(!ObjectId.isValid(id)){
+    res.status(404).send();
+  }
+
+  if(_.isBoolean(body.completed) && body.completed){
+    body.completedAt = new Date().getTime();
+  }else{
+    body.completed = false;
+    body.completedAt = null;
+  }
+  Todo.findByIdAndUpdate(id, {$set : body}, {new : true}).then((todo) => {
+    if(!todo){
+      res.status(404).send();
+    }
+    res.send({  todo });
+  }).catch((err) =>{
+    res.status(400).send(err);
+  });
+
 });

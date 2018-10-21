@@ -18,7 +18,7 @@ MongoClient.connect('mongodb://localhost:27017/TodoApp', (error, client) =>{
           age : 31
       }
     },{
-        returnOriginal : true
+        returnOriginal : true // OR we can use [new : true]
       }
     );
 
