@@ -16,6 +16,8 @@ const port = process.env.PORT || 3000;
 //use below express middleware statement to parse the request body aloways to a json
 app.use(bodyParser.json());
 
+
+//Todo URIs
 app.post('/todos',(req, res)=>{
   console.log(req.body);
   var newTodo = new Todo({
@@ -70,9 +72,6 @@ app.delete('/todos/:id',(req, res) => {
     res.status(400).send(err);
   });
 });
-app.listen(port, () => {
-  console.log(`App started up at port : ${port}`);
-});
 
 app.patch('/todos/:id',(req, res)=>{
   var id = req.params.id;
@@ -96,4 +95,55 @@ app.patch('/todos/:id',(req, res)=>{
     res.status(400).send(err);
   });
 
+});
+
+
+//User Post URI
+app.post('/users',(req, res)=>{
+  console.log(req.body);
+  var body = _.pick(req.body,['email','password']);
+  var user = new User(body);
+
+  user.save().then(() => {
+    return user.generateAuthToken();
+  }).then((token)=>{
+    res.header('x-auth',token).send(user);
+  }).catch((e)=> {
+    res.status(400).send(e);
+  });
+});
+
+
+app.post('/users', (req, res) => {
+  var body = _.pick(req.body, ['email', 'password']);
+  var user = new User(body);
+
+  user.save().then(() => {
+    return user.generateAuthToken();
+  }).then((token) => {
+    res.header('x-auth', token).send(user);
+  }).catch((e) => {
+    res.status(400).send(e);
+  })
+});
+
+app.get('/users',(req, res)=>{
+  User.find().then((users)=>{
+
+    // users = _.map(users, function(user) {
+    //   return _.pick(user, ['email', 'password']);
+    // });
+    res.send({
+      users,
+      status : 'OK'
+    });
+  }, (err)=>{
+    res.status(400).send(e);
+  });
+});
+
+
+
+app.listen(port, () => {
+  console.log(`App started up at port : ${port}`);
 });
