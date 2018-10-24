@@ -9,13 +9,19 @@ const {ObjectId} = require('mongodb');
 var {mongoose} = require('./db/mongoose');
 var {Todo} = require('./models/todo');
 var {User} = require('./models/user');
-
+var {authenticate} = require('./middleware/authenticate')
 var app = express();
 const port = process.env.PORT || 3000;
 
 //use below express middleware statement to parse the request body aloways to a json
 app.use(bodyParser.json());
+app.use((req, res,next)=>{
+		var now = new Date().toString();
 
+		console.log(`${now} : ${req.method} ${req.url}`);//logger
+		next();
+	}
+);
 
 //Todo URIs
 app.post('/todos',(req, res)=>{
@@ -127,6 +133,11 @@ app.post('/users', (req, res) => {
   })
 });
 
+
+
+app.get('/users/me',authenticate,(req, res) =>{
+  res.send(req.user);
+});
 app.get('/users',(req, res)=>{
   User.find().then((users)=>{
 
